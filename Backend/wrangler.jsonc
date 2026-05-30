@@ -1,0 +1,27 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "fenghou-backend",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-05-30",
+  "compatibility_flags": ["nodejs_compat_v2"],
+  "workers_dev": true,
+  "preview_urls": true,
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1
+  },
+  "routes": [
+    {
+      "pattern": "fenghou.goudaijun.top/api/*",
+      "zone_name": "goudaijun.top"
+    }
+  ],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "fenghou-device-data",
+      "database_id": "be1e6798-3a65-412a-a91d-ae24b6035eb4",
+      "migrations_dir": "migrations"
+    }
+  ]
+}

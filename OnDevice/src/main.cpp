@@ -2,8 +2,8 @@
 #include <HTTPClient.h>
 
 // 替换为你的 Wi-Fi 凭证
-const char* ssid = "Gouzuang";
-const char* password = "Gouzuang666";
+const char* ssid = "LEGION-33H5IUH1";
+const char* password = "34:c71M2";
 
 
 String serverName = "http://192.168.31.197";
