@@ -8,6 +8,7 @@ const DEVICE_ID_MAX_LENGTH = 128;
 const DEVICE_ID_PATTERN = /^[A-Za-z0-9._:-]+$/;
 const SENSOR_NAME_MAX_LENGTH = 128;
 const SENSOR_NAME_PATTERN = /^[A-Za-z0-9._:-]+$/;
+const MAX_SENSORS_PER_UPLOAD = 8;
 
 interface DeviceUploadPayload {
   deviceId: string;
@@ -168,6 +169,13 @@ function normalizeDeviceUploadPayload(
   if (sensors.length === 0) {
     return { ok: false, code: "invalid_sensor_data", error: "sensor_data must contain at least one sensor." };
   }
+  if (sensors.length > MAX_SENSORS_PER_UPLOAD) {
+    return {
+      ok: false,
+      code: "too_many_sensors",
+      error: `sensor_data may contain at most ${MAX_SENSORS_PER_UPLOAD} sensors per upload.`
+    };
+  }
 
   const sensorData = [];
   for (const [name, value] of sensors) {
@@ -176,8 +184,12 @@ function normalizeDeviceUploadPayload(
       return { ok: false, code: "invalid_sensor_name", error: sensorName.error };
     }
 
-    if (value === undefined) {
-      return { ok: false, code: "invalid_sensor_value", error: `Sensor ${name} has an unsupported value.` };
+    if (!isFlatSensorValue(value)) {
+      return {
+        ok: false,
+        code: "invalid_sensor_value",
+        error: `Sensor ${name} must be a scalar value; nested objects and arrays are not supported.`
+      };
     }
 
     sensorData.push(normalizeSensorReading(sensorName.value, value));
@@ -251,6 +263,10 @@ function normalizeSensorReading(name: string, value: unknown): DeviceUploadPaylo
     name,
     data: JSON.stringify(value)
   };
+}
+
+function isFlatSensorValue(value: unknown): boolean {
+  return value === null || typeof value === "string" || typeof value === "number" || typeof value === "boolean";
 }
 
 function isJsonObject(value: unknown): value is JsonObject {

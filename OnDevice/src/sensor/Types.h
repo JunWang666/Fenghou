@@ -66,7 +66,10 @@ struct LatestData {
   uint16_t nir = 0;
   float soundRms = 0.0f;
   float soundPeak = 0.0f;
+  float soundPeakMax = NAN;
   uint8_t soundLevel = 0;
+  float lightClearSum = NAN;
+  uint32_t aggregateSampleCount = 0;
   int8_t wifiRssi = 0;
   uint32_t uptimeS = 0;
 };

@@ -44,12 +44,10 @@ Request body:
 {
   "device_id": "esp32-c3-001",
   "sensor_data": {
-    "temperature": 25.3,
-    "humidity": 61.2,
-    "sgp30": {
-      "eco2": 415,
-      "tvoc": 9
-    }
+    "temperature_c": 25.3,
+    "humidity_rh": 61.2,
+    "eco2_ppm": 415,
+    "tvoc_ppb": 9
   },
   "time": "2026-05-30T15:30:00+08:00"
 }
@@ -61,12 +59,10 @@ PowerShell example:
 $body = @{
   device_id = "esp32-c3-001"
   sensor_data = @{
-    temperature = 25.3
-    humidity = 61.2
-    sgp30 = @{
-      eco2 = 415
-      tvoc = 9
-    }
+    temperature_c = 25.3
+    humidity_rh = 61.2
+    eco2_ppm = 415
+    tvoc_ppb = 9
   }
   time = "2026-05-30T15:30:00+08:00"
 } | ConvertTo-Json -Depth 5 -Compress
@@ -91,8 +87,10 @@ Fields:
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
 | `device_id` | string | yes | Device identifier. Allowed characters: letters, numbers, `.`, `_`, `:`, `-`. |
-| `sensor_data` | object | yes | Sensor map. Each key is stored as `sensor_name`; each value is stored as that row's `data`. |
+| `sensor_data` | object | yes | Flat sensor map. Each key is stored as `sensor_name`; values must be scalar JSON values, not nested objects or arrays. |
 | `time` | string or number | yes | Device-side measurement time. Accepts ISO timestamp, Unix seconds, or Unix milliseconds. |
+
+`sensor_data` may contain at most 8 sensor fields per upload. The device firmware should aggregate high-frequency samples before upload, for example Avg for temperature/humidity/pressure/altitude, Max for sound peak, and Sum for light clear counts.
 
 Response:
 
@@ -102,11 +100,12 @@ Response:
   "device_id": "esp32-c3-001",
   "time": "2026-05-30T07:30:00.000Z",
   "upload_time": "2026-05-30T07:30:01.000Z",
-  "sensor_count": 3,
+  "sensor_count": 4,
   "data_ids": [
     "uuid-1",
     "uuid-2",
-    "uuid-3"
+    "uuid-3",
+    "uuid-4"
   ]
 }
 ```

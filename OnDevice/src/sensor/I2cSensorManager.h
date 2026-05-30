@@ -81,5 +81,7 @@ private:
   bool as7341ReadSix(uint16_t *out);
   bool as7341Read(uint16_t f[8], uint16_t *clear, uint16_t *nir);
 
+  void initializeNfcViewLink();
+  bool st25WriteUserMemory(uint16_t offset, const uint8_t *data, size_t len);
   bool st25ReadUserMemory(char *buf, size_t len);
 };

@@ -83,6 +83,11 @@ export function normalizeLimit(value: string | null, fallback: number, max: numb
 }
 
 export function valueNumber(rawData: string): number | null {
+  const directValue = Number(rawData);
+  if (rawData.trim() !== "" && Number.isFinite(directValue)) {
+    return directValue;
+  }
+
   try {
     const value: unknown = JSON.parse(rawData);
     if (typeof value === "number" && Number.isFinite(value)) {

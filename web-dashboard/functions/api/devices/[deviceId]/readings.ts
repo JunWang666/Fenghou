@@ -18,6 +18,9 @@ interface ReadingRow {
   upload_time: string;
 }
 
+const DEFAULT_READING_LIMIT = 240;
+const MAX_READING_LIMIT = 500;
+
 export const onRequestGet: PagesFunction<Env> = async ({ request, env, params }) => {
   const deviceId = normalizeDeviceId(String(params.deviceId ?? ""));
   if (!deviceId) {
@@ -40,9 +43,9 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env, params })
     return jsonError("invalid_to", "to must be a valid timestamp.", 400);
   }
 
-  const limit = normalizeLimit(url.searchParams.get("limit"), 500, 2000);
+  const limit = normalizeLimit(url.searchParams.get("limit"), DEFAULT_READING_LIMIT, MAX_READING_LIMIT);
   if (!limit) {
-    return jsonError("invalid_limit", "limit must be an integer from 1 to 2000.", 400);
+    return jsonError("invalid_limit", `limit must be an integer from 1 to ${MAX_READING_LIMIT}.`, 400);
   }
 
   const clauses = ["device_id = ?"];

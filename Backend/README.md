@@ -18,12 +18,10 @@ Example:
 {
   "device_id": "esp32-c3-001",
   "sensor_data": {
-    "temperature": 25.3,
-    "humidity": 61.2,
-    "sgp30": {
-      "eco2": 415,
-      "tvoc": 9
-    }
+    "temperature_c": 25.3,
+    "humidity_rh": 61.2,
+    "eco2_ppm": 415,
+    "tvoc_ppb": 9
   },
   "time": "2026-05-30T15:30:00+08:00"
 }
@@ -31,14 +29,15 @@ Example:
 
 `time` accepts an ISO timestamp string, Unix seconds, or Unix milliseconds.
 
-The backend does not store the raw payload. It parses `sensor_data` and stores one row per sensor.
+The backend does not store the raw payload. It parses flat `sensor_data` and stores one row per sensor.
+Each upload is capped at 8 sensor fields so a single request cannot create unbounded D1 writes.
 
 Tables:
 
 - `device`: device-level first seen time, last upload time, and upload count.
 - `sensor_data`: parsed sensor rows with only `data_id`, `device_id`, `sensor_name`, `data`, `time`, and `upload_time`.
 
-For each payload entry, `sensor_data.data` stores that sensor's JSON value only, not the full request payload.
+For each payload entry, `sensor_data.data` stores that scalar sensor value only, not the full request payload. Nested objects and arrays are rejected.
 
 Successful response:
 
@@ -48,8 +47,8 @@ Successful response:
   "device_id": "esp32-c3-001",
   "time": "2026-05-30T07:30:00.000Z",
   "upload_time": "2026-05-30T07:30:01.000Z",
-  "sensor_count": 3,
-  "data_ids": ["uuid-1", "uuid-2", "uuid-3"]
+  "sensor_count": 4,
+  "data_ids": ["uuid-1", "uuid-2", "uuid-3", "uuid-4"]
 }
 ```
 
