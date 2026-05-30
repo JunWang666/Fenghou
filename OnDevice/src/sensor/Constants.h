@@ -52,6 +52,6 @@ static constexpr const char *DEFAULT_DEVICE_ID = DEVICE_ID;
 static constexpr const char *DEFAULT_SERVER = DEFAULT_UPLOAD_URL;
 static constexpr const char *CONFIG_BEGIN = "CFG:";
 
-static constexpr uint32_t DEFAULT_UPLOAD_INTERVAL_MS = 10000;
-static constexpr uint32_t MIN_UPLOAD_INTERVAL_MS = 5000;
-static constexpr uint32_t MAX_UPLOAD_INTERVAL_MS = 300000;
+static constexpr uint32_t DEFAULT_UPLOAD_INTERVAL_MS = 5000;
+static constexpr uint32_t MIN_UPLOAD_INTERVAL_MS = 1000;
+static constexpr uint32_t MAX_UPLOAD_INTERVAL_MS = 10000;

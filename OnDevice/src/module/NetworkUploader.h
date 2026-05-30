@@ -19,5 +19,6 @@ private:
 
   bool ensureWifi(const DeviceConfig &cfg);
   bool postPayload(const DeviceConfig &cfg, const String &payload, const char *tag);
+  String onlineRefreshPayload(const DeviceConfig &cfg);
   String jsonPayload(const LatestData &data, const DeviceConfig &cfg);
 };
