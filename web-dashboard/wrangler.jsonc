@@ -1,0 +1,13 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "fenghou-web-dashboard",
+  "compatibility_date": "2026-05-30",
+  "pages_build_output_dir": "dist",
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "fenghou-device-data",
+      "database_id": "be1e6798-3a65-412a-a91d-ae24b6035eb4"
+    }
+  ]
+}
