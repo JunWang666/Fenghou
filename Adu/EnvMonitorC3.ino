@@ -55,6 +55,14 @@ void setup() {
   }
   configStore.load();
 
+  Serial.printf("Board: %s I2C(SDA=%d,SCL=%d) I2S(BCLK=%d,WS=%d,SD=%d)\n",
+                ENV_BOARD_NAME,
+                PIN_I2C_SDA,
+                PIN_I2C_SCL,
+                PIN_I2S_BCLK,
+                PIN_I2S_WS,
+                PIN_I2S_SD);
+
   DeviceConfig cfg;
   configStore.getCopy(&cfg);
   Serial.printf("Config: valid=%d ssid=%s server=%s device=%s\n",

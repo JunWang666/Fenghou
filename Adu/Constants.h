@@ -2,14 +2,33 @@
 
 #include <Arduino.h>
 
-// ESP32-C3 pin plan from the design:
-// I2C: GPIO4 SDA, GPIO5 SCL
-// INMP441: GPIO6 BCLK, GPIO7 WS, GPIO10 SD/DOUT, L/R tied to GND
-static constexpr int PIN_I2C_SDA = 4;
-static constexpr int PIN_I2C_SCL = 5;
-static constexpr int PIN_I2S_BCLK = 6;
-static constexpr int PIN_I2S_WS = 7;
-static constexpr int PIN_I2S_SD = 10;
+#if defined(CONFIG_IDF_TARGET_ESP32C3)
+#error "This sketch is configured for ESP32-S3. Select an ESP32-S3 board in Arduino IDE."
+#endif
+
+#ifndef ENV_BOARD_NAME
+#define ENV_BOARD_NAME "ESP32-S3"
+#endif
+
+// ESP32-S3 default pin plan.
+// I2C: GPIO8 SDA, GPIO9 SCL
+// INMP441: GPIO15 BCLK/SCK, GPIO16 WS/LRCL, GPIO17 SD/DOUT, L/R tied to GND
+// Override these PIN_* macros from build flags if your S3 board already uses them.
+#ifndef PIN_I2C_SDA
+static constexpr int PIN_I2C_SDA = 8;
+#endif
+#ifndef PIN_I2C_SCL
+static constexpr int PIN_I2C_SCL = 9;
+#endif
+#ifndef PIN_I2S_BCLK
+static constexpr int PIN_I2S_BCLK = 15;
+#endif
+#ifndef PIN_I2S_WS
+static constexpr int PIN_I2S_WS = 16;
+#endif
+#ifndef PIN_I2S_SD
+static constexpr int PIN_I2S_SD = 17;
+#endif
 
 static constexpr uint32_t I2C_CLOCK_HZ = 100000;
 static constexpr TickType_t QUEUE_WAIT = pdMS_TO_TICKS(20);
@@ -21,7 +40,7 @@ static constexpr uint8_t BMP280_ADDR_PRIMARY = 0x76;
 static constexpr uint8_t BMP280_ADDR_SECONDARY = 0x77;
 static constexpr uint8_t ST25_USER_ADDR = 0x53;
 
-static constexpr const char *DEFAULT_DEVICE_ID = "env-node-001";
+static constexpr const char *DEFAULT_DEVICE_ID = "env-node-s3-001";
 static constexpr const char *CONFIG_BEGIN = "CFG:";
 
 static constexpr uint32_t DEFAULT_UPLOAD_INTERVAL_MS = 10000;
