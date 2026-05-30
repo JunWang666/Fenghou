@@ -63,6 +63,16 @@ async function handleDeviceUpload(request: Request, env: Env): Promise<Response>
     return jsonError(upload.code, upload.error, 400);
   }
 
+  console.log(
+    JSON.stringify({
+      event: "device_upload_received",
+      device_id: upload.value.deviceId,
+      time: upload.value.recordedAt,
+      sensor_count: upload.value.sensorData.length,
+      sensor_names: upload.value.sensorData.map((sensor) => sensor.name)
+    })
+  );
+
   const receivedAt = new Date().toISOString();
 
   const statements = [
@@ -97,6 +107,17 @@ async function handleDeviceUpload(request: Request, env: Env): Promise<Response>
   }
 
   await env.DB.batch(statements);
+
+  console.log(
+    JSON.stringify({
+      event: "device_upload_stored",
+      device_id: upload.value.deviceId,
+      time: upload.value.recordedAt,
+      upload_time: receivedAt,
+      sensor_count: upload.value.sensorData.length,
+      data_ids: dataIds
+    })
+  );
 
   return jsonResponse(
     {
