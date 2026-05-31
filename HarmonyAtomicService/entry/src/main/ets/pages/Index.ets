@@ -1,64 +1,122 @@
-import { authentication } from '@kit.AccountKit';
-import { BusinessError } from '@kit.BasicServicesKit';
 import { hilog } from '@kit.PerformanceAnalysisKit';
+import uri from '@ohos.uri';
+import { DeviceLivePage } from './DeviceLivePage';
+import { DeviceTrendPage } from './DeviceTrendPage';
 
 const DOMAIN = 0x0000;
+const TAG = 'Index';
 
 @Entry
 @Component
 struct Index {
-  @State message: string = 'Hello World';
+  @StorageLink('launchUri') launchUri: string = '';
+  pathStack: NavPathStack = new NavPathStack();
+  @State deviceId: string = '';
+  @State errorMessage: string = '';
+  @State resolved: boolean = false;
+
+  aboutToAppear(): void {
+    AppStorage.setOrCreate<string>('deviceId', '');
+    this.parseLaunchUri();
+  }
+
+  private parseLaunchUri(): void {
+    if (this.launchUri.length > 0) {
+      this.extractDeviceId(this.launchUri);
+    }
+  }
+
+  private extractDeviceId(rawUri: string): void {
+    try {
+      hilog.info(DOMAIN, TAG, `Parsing URI: ${rawUri}`);
+      const parsedUri: uri.URI = new uri.URI(rawUri);
+      const path: string = parsedUri.path ?? '';
+      const pathParts: string[] = path.split('/').filter((part: string) => part.length > 0);
+
+      let id: string = '';
+      // Pattern: /view/<deviceId> or /dash/<deviceId>
+      if (pathParts.length >= 2) {
+        const mode: string = pathParts[0];
+        if (mode === 'view' || mode === 'dash') {
+          id = decodeURIComponent(pathParts[1]);
+        }
+      }
+      // Pattern: /nfc/d/<deviceId>
+      if (pathParts.length >= 3 && pathParts[0] === 'nfc' && pathParts[1] === 'd') {
+        id = decodeURIComponent(pathParts[2]);
+      }
+
+      if (id.length > 0) {
+        this.deviceId = id;
+        this.resolved = true;
+        this.errorMessage = '';
+        hilog.info(DOMAIN, TAG, `Device ID: ${id}`);
+        this.pathStack.pushPathByName('DeviceLivePage', null);
+      } else {
+        this.errorMessage = '无法从链接中解析设备ID';
+        hilog.warn(DOMAIN, TAG, `No device ID found in URI: ${rawUri}`);
+      }
+    } catch (err) {
+      this.errorMessage = '链接格式无效';
+      hilog.error(DOMAIN, TAG, `URI parse error: ${err}`);
+    }
+  }
 
   build() {
-    RelativeContainer() {
-      Text(this.message)
-        .id('HelloWorld')
-        .fontSize($r('app.float.page_text_font_size'))
-        .fontWeight(FontWeight.Bold)
-        .alignRules({
-          center: { anchor: '__container__', align: VerticalAlign.Center },
-          middle: { anchor: '__container__', align: HorizontalAlign.Center }
-        })
-        .onClick(() => {
-          this.message = 'Welcome';
-        })
-
-    }
-    .height('100%')
-    .width('100%')
-  }
-
-  aboutToAppear() {
-    hilog.info(DOMAIN, 'testTag', '%{public}s', 'Ability onCreate');
-    this.loginWithHuaweiID();
-  }
-
-  /**
-   * Sample code for using HUAWEI ID to log in to atomic service.
-   * According to the Atomic Service Review Guide, when a atomic service has an account system,
-   * the option to log in with a HUAWEI ID must be provided.
-   * The following presets the atomic service to use the HUAWEI ID silent login function.
-   * To enable the atomic service to log in successfully using the HUAWEI ID, please refer
-   * to the HarmonyOS HUAWEI ID Access Guide to configure the client ID and fingerprint certificate.
-   */
-  private loginWithHuaweiID() {
-    // Create a login request and set parameters
-    const loginRequest = new authentication.HuaweiIDProvider().createLoginWithHuaweiIDRequest();
-    // Whether to forcibly launch the HUAWEI ID login page when the user is not logged in with the HUAWEI ID
-    loginRequest.forceLogin = false;
-    // Execute login request
-    const controller = new authentication.AuthenticationController();
-    controller.executeRequest(loginRequest).then((data) => {
-      const loginWithHuaweiIDResponse = data as authentication.LoginWithHuaweiIDResponse;
-      const authCode = loginWithHuaweiIDResponse.data?.authorizationCode;
-      // Send authCode to the backend in exchange for unionID, session
-
-    }).catch((error: BusinessError) => {
-      hilog.error(DOMAIN, 'testTag', 'error: %{public}s', JSON.stringify(error));
-      if (error.code === authentication.AuthenticationErrorCode.ACCOUNT_NOT_LOGGED_IN) {
-        // HUAWEI ID is not logged in, it is recommended to jump to the login guide page
-
+    Navigation(this.pathStack) {
+      Column() {
+        if (this.errorMessage.length > 0) {
+          Column() {
+            Text('⚠')
+              .fontSize(48)
+              .margin({ bottom: 16 })
+            Text(this.errorMessage)
+              .fontSize(16)
+              .fontColor('#666666')
+              .textAlign(TextAlign.Center)
+            Text('请通过NFC标签或分享链接打开')
+              .fontSize(14)
+              .fontColor('#999999')
+              .margin({ top: 8 })
+              .textAlign(TextAlign.Center)
+          }
+          .width('100%')
+          .height('100%')
+          .justifyContent(FlexAlign.Center)
+        } else if (!this.resolved) {
+          Column() {
+            LoadingProgress()
+              .width(48)
+              .height(48)
+              .color('#2563eb')
+            Text('正在加载...')
+              .fontSize(14)
+              .fontColor('#666666')
+              .margin({ top: 16 })
+          }
+          .width('100%')
+          .height('100%')
+          .justifyContent(FlexAlign.Center)
+        } else {
+          Column()
+            .width('100%')
+            .height('100%')
+        }
       }
-    });
+      .width('100%')
+      .height('100%')
+      .backgroundColor('#f3f4f6')
+    }
+    .title('凤候')
+    .navDestination(this.pageMap)
+  }
+
+  @Builder
+  pageMap(name: string, param: Object) {
+    if (name === 'DeviceLivePage') {
+      DeviceLivePage({ deviceId: this.deviceId })
+    } else if (name === 'DeviceTrendPage') {
+      DeviceTrendPage({ deviceId: this.deviceId })
+    }
   }
 }

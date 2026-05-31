@@ -263,13 +263,14 @@ Minimum recommended protection:
 
 ## Milestone Checklist
 
-- [ ] Create DevEco Studio atomic service project in this directory.
-- [ ] Configure package name and signing profile.
-- [ ] Configure link routing for NFC/App Linking.
-- [ ] Implement `NfcEntryPage`.
-- [ ] Implement `DeviceLivePage`.
-- [ ] Add backend API client.
-- [ ] Add loading, empty, error, and retry states.
+- [x] Create DevEco Studio atomic service project in this directory.
+- [x] Configure package name and signing profile.
+- [x] Configure link routing for NFC/App Linking.
+- [x] Implement `NfcEntryPage`.
+- [x] Implement `DeviceLivePage`.
+- [x] Implement `DeviceTrendPage` (with Canvas-based charts).
+- [x] Add backend API client.
+- [x] Add loading, empty, error, and retry states.
 - [ ] Test direct launch URL on a local phone.
 - [ ] Write NFC tags for test devices.
 - [ ] Test NFC launch on at least one HarmonyOS phone.

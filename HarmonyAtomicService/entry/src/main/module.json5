@@ -10,6 +10,11 @@
     "deliveryWithInstall": true,
     "installationFree": true,
     "pages": "$profile:main_pages",
+    "requestPermissions": [
+      {
+        "name": "ohos.permission.INTERNET"
+      }
+    ],
     "abilities": [
       {
         "name": "EntryAbility",
@@ -27,6 +32,23 @@
             ],
             "actions": [
               "ohos.want.action.home"
+            ]
+          },
+          {
+            "actions": [
+              "ohos.want.action.viewData"
+            ],
+            "uris": [
+              {
+                "scheme": "https",
+                "host": "fenghou.goudaijun.top",
+                "path": "/view"
+              },
+              {
+                "scheme": "https",
+                "host": "fenghou.goudaijun.top",
+                "path": "/dash"
+              }
             ]
           }
         ]

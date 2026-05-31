@@ -2,15 +2,19 @@
   "string": [
     {
       "name": "module_desc",
-      "value": "module description"
+      "value": "凤候环境监测元服务"
     },
     {
       "name": "EntryAbility_desc",
-      "value": "description"
+      "value": "凤候环境监测"
     },
     {
       "name": "EntryAbility_label",
-      "value": "label"
+      "value": "凤候"
+    },
+    {
+      "name": "app_name",
+      "value": "凤候"
     }
   ]
 }
