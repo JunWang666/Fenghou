@@ -4,6 +4,7 @@
 #include <math.h>
 
 #include "Constants.h"
+#include "DeviceIdentity.h"
 
 enum SensorKind : uint8_t {
   KIND_AHT,
@@ -16,7 +17,7 @@ enum SensorKind : uint8_t {
 
 struct DeviceConfig {
   DeviceConfig() {
-    strlcpy(deviceId, DEFAULT_DEVICE_ID, sizeof(deviceId));
+    setChipDeviceId(deviceId, sizeof(deviceId));
   }
 
   char ssid[33] = "";
@@ -42,8 +43,13 @@ struct SensorSample {
   uint16_t f[8];
   uint16_t clear;
   uint16_t nir;
+  bool sunlightPresent;
+  float sunlightDurationMinutes;
+  bool flickerHazard;
+  uint8_t flickerStatus;
   float soundRms;
   float soundPeak;
+  float soundDb;
   uint8_t soundLevel;
 };
 
@@ -64,9 +70,19 @@ struct LatestData {
   uint16_t f[8] = {};
   uint16_t clear = 0;
   uint16_t nir = 0;
+  bool sunlightPresent = false;
+  bool flickerHazard = false;
+  uint8_t flickerStatus = 0;
   float soundRms = 0.0f;
   float soundPeak = 0.0f;
+  float soundPeakMax = NAN;
+  float soundDb = NAN;
   uint8_t soundLevel = 0;
+  float noiseMaxDb = NAN;
+  float highVolumeExposureMinutes = NAN;
+  float flickerHazardCount = NAN;
+  float sunlightDurationMinutes = NAN;
+  uint32_t aggregateSampleCount = 0;
   int8_t wifiRssi = 0;
   uint32_t uptimeS = 0;
 };

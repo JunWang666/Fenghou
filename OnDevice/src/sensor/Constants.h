@@ -40,18 +40,22 @@ static constexpr uint8_t BMP280_ADDR_PRIMARY = 0x76;
 static constexpr uint8_t BMP280_ADDR_SECONDARY = 0x77;
 static constexpr uint8_t ST25_USER_ADDR = 0x53;
 
-#ifndef DEVICE_ID
-#define DEVICE_ID "test_1"
-#endif
 
-#ifndef DEFAULT_UPLOAD_URL
-#define DEFAULT_UPLOAD_URL "https://fenghou.goudaijun.top/api/device/upload"
-#endif
-
-static constexpr const char *DEFAULT_DEVICE_ID = DEVICE_ID;
 static constexpr const char *DEFAULT_SERVER = DEFAULT_UPLOAD_URL;
+static constexpr const char *DEFAULT_VIEW_URL_PREFIX = "https://fenghou.goudaijun.top/view/";
 static constexpr const char *CONFIG_BEGIN = "CFG:";
 
-static constexpr uint32_t DEFAULT_UPLOAD_INTERVAL_MS = 5000;
-static constexpr uint32_t MIN_UPLOAD_INTERVAL_MS = 1000;
-static constexpr uint32_t MAX_UPLOAD_INTERVAL_MS = 10000;
+static constexpr uint32_t AHT_SAMPLE_INTERVAL_MS = 1000;
+static constexpr uint32_t BMP_SAMPLE_INTERVAL_MS = 1000;
+static constexpr uint32_t SGP_SAMPLE_INTERVAL_MS = 1000;
+static constexpr uint32_t AS7341_SAMPLE_INTERVAL_MS = 2000;
+static constexpr uint32_t NFC_POLL_INTERVAL_MS = 5000;
+static constexpr uint32_t AUDIO_SAMPLE_INTERVAL_MS = 1000;
+static constexpr uint32_t AUDIO_NOISE_WINDOW_MS = 60000;
+static constexpr float AUDIO_DB_SPL_OFFSET = 60.0f;
+static constexpr float AUDIO_MIN_RMS_FOR_DB = 0.000001f;
+static constexpr float AUDIO_HIGH_VOLUME_DB = 85.0f;
+
+static constexpr uint32_t DEFAULT_UPLOAD_INTERVAL_MS = 30000;
+static constexpr uint32_t MIN_UPLOAD_INTERVAL_MS = 30000;
+static constexpr uint32_t MAX_UPLOAD_INTERVAL_MS = 300000;

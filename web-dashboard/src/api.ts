@@ -1,5 +1,7 @@
 import type { DevicesResponse, ReadingsResponse, SensorsResponse } from "./types";
 
+const API_BASE = "/dash-api";
+
 function isApiError(value: unknown): value is { ok: false; error?: { message?: string } } {
   return typeof value === "object" && value !== null && "ok" in value;
 }
@@ -17,16 +19,17 @@ async function getJson<T>(url: string): Promise<T> {
 }
 
 export function fetchDevices(): Promise<DevicesResponse> {
-  return getJson<DevicesResponse>("/api/devices");
+  return getJson<DevicesResponse>(`${API_BASE}/devices`);
 }
 
 export function fetchSensors(deviceId: string): Promise<SensorsResponse> {
-  return getJson<SensorsResponse>(`/api/devices/${encodeURIComponent(deviceId)}/sensors`);
+  return getJson<SensorsResponse>(`${API_BASE}/devices/${deviceId}/sensors`);
 }
 
 export function fetchReadings(params: {
   deviceId: string;
   sensors: string[];
+  bucket?: "hour";
   from?: string;
   to?: string;
   limit?: number;
@@ -45,11 +48,15 @@ export function fetchReadings(params: {
     query.set("to", params.to);
   }
 
+  if (params.bucket) {
+    query.set("bucket", params.bucket);
+  }
+
   if (params.limit) {
     query.set("limit", String(params.limit));
   }
 
   return getJson<ReadingsResponse>(
-    `/api/devices/${encodeURIComponent(params.deviceId)}/readings?${query.toString()}`
+    `${API_BASE}/devices/${params.deviceId}/readings?${query.toString()}`
   );
 }

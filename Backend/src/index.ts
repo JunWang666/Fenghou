@@ -176,8 +176,12 @@ function normalizeDeviceUploadPayload(
       return { ok: false, code: "invalid_sensor_name", error: sensorName.error };
     }
 
-    if (value === undefined) {
-      return { ok: false, code: "invalid_sensor_value", error: `Sensor ${name} has an unsupported value.` };
+    if (!isFlatSensorValue(value)) {
+      return {
+        ok: false,
+        code: "invalid_sensor_value",
+        error: `Sensor ${name} must be a scalar value; nested objects and arrays are not supported.`
+      };
     }
 
     sensorData.push(normalizeSensorReading(sensorName.value, value));
@@ -251,6 +255,10 @@ function normalizeSensorReading(name: string, value: unknown): DeviceUploadPaylo
     name,
     data: JSON.stringify(value)
   };
+}
+
+function isFlatSensorValue(value: unknown): boolean {
+  return value === null || typeof value === "string" || typeof value === "number" || typeof value === "boolean";
 }
 
 function isJsonObject(value: unknown): value is JsonObject {

@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__MiniMax__web_search",
+      "WebSearch",
+      "WebFetch(domain:developer.huawei.com)",
+      "WebFetch(domain:gitee.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:juejin.cn)",
+      "WebFetch(domain:docs.openharmony.cn)",
+      "WebFetch(domain:stackoverflow.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:www.cnblogs.com)",
+      "WebFetch(domain:www.huawei.com)",
+      "Read(//c/Users/gouzuang/AppData/Local/Huawei/**)",
+      "Read(//c/Program Files/Huawei/**)",
+      "Read(//c//**)"
+    ]
+  }
+}

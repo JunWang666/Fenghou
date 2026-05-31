@@ -1,0 +1,56 @@
+{
+  "app": {
+    "signingConfigs": [
+      {
+        "name": "default",
+        "type": "HarmonyOS",
+        "material": {
+          "storeFile": "C:/Users/gouzuang/OneDrive/Files/CloudKeys/huawei.p12",
+          "storePassword": "0000001C39F0A4C659DEE70E773422063E13DBE0C94062C083BC0417E4D64CE087DD2CB7C39D581241ED7F52",
+          "keyAlias": "test",
+          "keyPassword": "0000001CFBAEF673A3DCA72066F5CD706DA0F72FBEB3D4C18A50C37251995C0BDF7C820894BCCFE5BC659C42",
+          "signAlg": "SHA256withECDSA",
+          "profile": "C:/Users/gouzuang/OneDrive/Files/CloudKeys/devecos/publishRelease.p7b",
+          "certpath": "C:/Users/gouzuang/OneDrive/Files/CloudKeys/devecos/publish.cer"
+        }
+      }
+    ],
+    "products": [
+      {
+        "name": "default",
+        "signingConfig": "default",
+        "targetSdkVersion": "6.0.0(20)",
+        "compatibleSdkVersion": "6.0.0(20)",
+        "runtimeOS": "HarmonyOS",
+        "buildOption": {
+          "strictMode": {
+            "caseSensitiveCheck": true,
+            "useNormalizedOHMUrl": true
+          }
+        }
+      }
+    ],
+    "buildModeSet": [
+      {
+        "name": "debug",
+      },
+      {
+        "name": "release"
+      }
+    ]
+  },
+  "modules": [
+    {
+      "name": "entry",
+      "srcPath": "./entry",
+      "targets": [
+        {
+          "name": "default",
+          "applyToProducts": [
+            "default"
+          ]
+        }
+      ]
+    }
+  ]
+}

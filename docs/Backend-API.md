@@ -42,14 +42,16 @@ Request body:
 
 ```json
 {
-  "device_id": "esp32-c3-001",
+  "device_id": "esp32-s3-001",
   "sensor_data": {
     "temperature": 25.3,
     "humidity": 61.2,
-    "sgp30": {
-      "eco2": 415,
-      "tvoc": 9
-    }
+    "pressure": 1008.4,
+    "altitude": 41.5,
+    "noise_max_db": 76.4,
+    "high_volume_exposure_minutes": 2,
+    "flicker_hazard_count": 3,
+    "sunlight_duration_minutes": 42
   },
   "time": "2026-05-30T15:30:00+08:00"
 }
@@ -59,14 +61,16 @@ PowerShell example:
 
 ```powershell
 $body = @{
-  device_id = "esp32-c3-001"
+  device_id = "esp32-s3-001"
   sensor_data = @{
     temperature = 25.3
     humidity = 61.2
-    sgp30 = @{
-      eco2 = 415
-      tvoc = 9
-    }
+    pressure = 1008.4
+    altitude = 41.5
+    noise_max_db = 76.4
+    high_volume_exposure_minutes = 2
+    flicker_hazard_count = 3
+    sunlight_duration_minutes = 42
   }
   time = "2026-05-30T15:30:00+08:00"
 } | ConvertTo-Json -Depth 5 -Compress
@@ -91,8 +95,10 @@ Fields:
 | Field | Type | Required | Description |
 | --- | --- | --- | --- |
 | `device_id` | string | yes | Device identifier. Allowed characters: letters, numbers, `.`, `_`, `:`, `-`. |
-| `sensor_data` | object | yes | Sensor map. Each key is stored as `sensor_name`; each value is stored as that row's `data`. |
+| `sensor_data` | object | yes | Flat sensor map. Each key is stored as `sensor_name`; values must be scalar JSON values, not nested objects or arrays. |
 | `time` | string or number | yes | Device-side measurement time. Accepts ISO timestamp, Unix seconds, or Unix milliseconds. |
+
+The current device upload fields are `humidity`, `temperature`, `pressure`, `altitude`, `noise_max_db`, `high_volume_exposure_minutes`, `flicker_hazard_count`, and `sunlight_duration_minutes`.
 
 Response:
 
@@ -102,11 +108,16 @@ Response:
   "device_id": "esp32-c3-001",
   "time": "2026-05-30T07:30:00.000Z",
   "upload_time": "2026-05-30T07:30:01.000Z",
-  "sensor_count": 3,
+  "sensor_count": 8,
   "data_ids": [
     "uuid-1",
     "uuid-2",
-    "uuid-3"
+    "uuid-3",
+    "uuid-4",
+    "uuid-5",
+    "uuid-6",
+    "uuid-7",
+    "uuid-8"
   ]
 }
 ```
