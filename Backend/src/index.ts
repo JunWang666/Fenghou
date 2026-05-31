@@ -8,7 +8,6 @@ const DEVICE_ID_MAX_LENGTH = 128;
 const DEVICE_ID_PATTERN = /^[A-Za-z0-9._:-]+$/;
 const SENSOR_NAME_MAX_LENGTH = 128;
 const SENSOR_NAME_PATTERN = /^[A-Za-z0-9._:-]+$/;
-const MAX_SENSORS_PER_UPLOAD = 8;
 
 interface DeviceUploadPayload {
   deviceId: string;
@@ -168,13 +167,6 @@ function normalizeDeviceUploadPayload(
   const sensors = Object.entries(payload.sensor_data);
   if (sensors.length === 0) {
     return { ok: false, code: "invalid_sensor_data", error: "sensor_data must contain at least one sensor." };
-  }
-  if (sensors.length > MAX_SENSORS_PER_UPLOAD) {
-    return {
-      ok: false,
-      code: "too_many_sensors",
-      error: `sensor_data may contain at most ${MAX_SENSORS_PER_UPLOAD} sensors per upload.`
-    };
   }
 
   const sensorData = [];

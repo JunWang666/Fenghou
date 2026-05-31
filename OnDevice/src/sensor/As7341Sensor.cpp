@@ -110,3 +110,62 @@ bool I2cSensorManager::as7341Read(uint16_t f[8], uint16_t *clear, uint16_t *nir)
   *nir = (lo[5] + hi[5]) / 2;
   return true;
 }
+
+bool I2cSensorManager::as7341ReadFlickerStatus(uint8_t *status) {
+  static const uint8_t smuxFlicker[20] = {
+      0x00, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x00,
+      0x00, 0x00, 0x00, 0x00, 0x60};
+
+  *status = 0;
+  if (!i2cWriteByte(AS7341_ADDR, 0x80, 0x00)) {
+    return false;
+  }
+  vTaskDelay(pdMS_TO_TICKS(2));
+  if (!i2cWriteByte(AS7341_ADDR, 0x80, 0x01) ||
+      !as7341WriteSmux(smuxFlicker) ||
+      !i2cWriteByte(AS7341_ADDR, 0x80, 0x41)) {
+    return false;
+  }
+
+  vTaskDelay(pdMS_TO_TICKS(500));
+  bool ok = i2cReadReg(AS7341_ADDR, 0xDB, status, 1);
+  i2cWriteByte(AS7341_ADDR, 0x80, 0x01);
+  return ok;
+}
+
+bool I2cSensorManager::as7341IsSunlightLike(const uint16_t f[8], uint16_t clear, uint16_t nir) {
+  uint32_t visible = 0;
+  for (uint8_t i = 0; i < 8; i++) {
+    visible += f[i];
+  }
+  if (clear < 50 || visible < 120) {
+    return false;
+  }
+
+  float blueRatio = static_cast<float>(f[0] + f[1] + f[2]) / static_cast<float>(visible);
+  float redRatio = static_cast<float>(f[6] + f[7]) / static_cast<float>(visible);
+  float nirRatio = static_cast<float>(nir) / static_cast<float>(visible);
+  uint16_t minVisible = f[0];
+  uint16_t maxVisible = f[0];
+  for (uint8_t i = 1; i < 8; i++) {
+    minVisible = min(minVisible, f[i]);
+    maxVisible = max(maxVisible, f[i]);
+  }
+  float spread = minVisible > 0 ? static_cast<float>(maxVisible) / static_cast<float>(minVisible) : 99.0f;
+
+  return nirRatio >= 0.015f &&
+         redRatio >= 0.18f &&
+         blueRatio >= 0.08f &&
+         spread <= 18.0f;
+}
+
+bool I2cSensorManager::as7341IsFlickerHazard(uint8_t status) {
+  bool saturated = (status & 0x10) != 0;
+  bool valid100Hz = (status & 0x04) != 0;
+  bool valid120Hz = (status & 0x08) != 0;
+  bool detected100Hz = (status & 0x01) != 0;
+  bool detected120Hz = (status & 0x02) != 0;
+  return !saturated && ((valid100Hz && detected100Hz) || (valid120Hz && detected120Hz));
+}

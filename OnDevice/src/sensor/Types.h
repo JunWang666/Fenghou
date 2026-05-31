@@ -42,6 +42,9 @@ struct SensorSample {
   uint16_t f[8];
   uint16_t clear;
   uint16_t nir;
+  bool sunlightPresent;
+  bool flickerHazard;
+  uint8_t flickerStatus;
   float soundRms;
   float soundPeak;
   uint8_t soundLevel;
@@ -64,11 +67,15 @@ struct LatestData {
   uint16_t f[8] = {};
   uint16_t clear = 0;
   uint16_t nir = 0;
+  bool sunlightPresent = false;
+  bool flickerHazard = false;
+  uint8_t flickerStatus = 0;
   float soundRms = 0.0f;
   float soundPeak = 0.0f;
   float soundPeakMax = NAN;
   uint8_t soundLevel = 0;
-  float lightClearSum = NAN;
+  float flickerHazardCount = NAN;
+  float sunlightDurationMinutes = NAN;
   uint32_t aggregateSampleCount = 0;
   int8_t wifiRssi = 0;
   uint32_t uptimeS = 0;

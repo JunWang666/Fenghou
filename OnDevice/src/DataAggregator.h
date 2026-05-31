@@ -38,7 +38,9 @@ private:
   MetricAggregate pressure_;
   MetricAggregate altitude_;
   MetricAggregate soundPeak_;
-  MetricAggregate lightClear_;
+  uint32_t lastLightSampleMs_ = 0;
+  uint32_t sunlightDurationMs_ = 0;
+  uint32_t flickerHazardCount_ = 0;
   uint32_t windowSampleCount_ = 0;
 
   void applySample(const SensorSample &sample);

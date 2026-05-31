@@ -128,14 +128,11 @@ String NetworkUploader::jsonPayload(const LatestData &d, const DeviceConfig &cfg
   } else {
     sensor["altitude"] = nullptr;
   }
-  if (isfinite(d.soundPeakMax)) {
-    sensor["sound_peak_max"] = serialized(String(d.soundPeakMax, 4));
+  if (isfinite(d.flickerHazardCount)) {
+    sensor["flicker_hazard_count"] = serialized(String(d.flickerHazardCount, 0));
   }
-  if (isfinite(d.lightClearSum)) {
-    sensor["light_clear_sum"] = serialized(String(d.lightClearSum, 0));
-  }
-  if (d.aggregateSampleCount > 0) {
-    sensor["sample_count"] = d.aggregateSampleCount;
+  if (isfinite(d.sunlightDurationMinutes)) {
+    sensor["sunlight_duration_minutes"] = serialized(String(d.sunlightDurationMinutes, 0));
   }
 
   String output;

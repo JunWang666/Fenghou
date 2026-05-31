@@ -30,7 +30,6 @@ Example:
 `time` accepts an ISO timestamp string, Unix seconds, or Unix milliseconds.
 
 The backend does not store the raw payload. It parses flat `sensor_data` and stores one row per sensor.
-Each upload is capped at 8 sensor fields so a single request cannot create unbounded D1 writes.
 
 Tables:
 

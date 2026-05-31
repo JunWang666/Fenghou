@@ -81,7 +81,20 @@ void DataAggregator::applySample(const SensorSample &sample) {
       memcpy(latestData_->f, sample.f, sizeof(latestData_->f));
       latestData_->clear = sample.clear;
       latestData_->nir = sample.nir;
-      lightClear_.add(static_cast<float>(sample.clear));
+      latestData_->sunlightPresent = sample.sunlightPresent;
+      latestData_->flickerHazard = sample.flickerHazard;
+      latestData_->flickerStatus = sample.flickerStatus;
+      uint32_t elapsedMs = lastLightSampleMs_ == 0 ? AS7341_SAMPLE_INTERVAL_MS : sample.ms - lastLightSampleMs_;
+      lastLightSampleMs_ = sample.ms;
+      elapsedMs = min(elapsedMs, AS7341_SAMPLE_INTERVAL_MS * 2);
+      if (sample.sunlightPresent) {
+        sunlightDurationMs_ += elapsedMs;
+      }
+      if (sample.flickerHazard) {
+        flickerHazardCount_++;
+      }
+      latestData_->sunlightDurationMinutes = static_cast<float>(sunlightDurationMs_ / 60000UL);
+      latestData_->flickerHazardCount = static_cast<float>(flickerHazardCount_);
       windowSampleCount_++;
     }
     break;
@@ -116,9 +129,8 @@ void DataAggregator::buildUploadSnapshot(LatestData *snapshot) const {
   if (soundPeak_.hasValue()) {
     snapshot->soundPeakMax = soundPeak_.maxValue();
   }
-  if (lightClear_.hasValue()) {
-    snapshot->lightClearSum = lightClear_.sumValue();
-  }
+  snapshot->sunlightDurationMinutes = static_cast<float>(sunlightDurationMs_ / 60000UL);
+  snapshot->flickerHazardCount = static_cast<float>(flickerHazardCount_);
   snapshot->aggregateSampleCount = windowSampleCount_;
 }
 
@@ -128,7 +140,6 @@ void DataAggregator::resetUploadWindow() {
   pressure_.reset();
   altitude_.reset();
   soundPeak_.reset();
-  lightClear_.reset();
   windowSampleCount_ = 0;
 }
 

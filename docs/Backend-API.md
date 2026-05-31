@@ -42,12 +42,14 @@ Request body:
 
 ```json
 {
-  "device_id": "esp32-c3-001",
+  "device_id": "esp32-s3-001",
   "sensor_data": {
-    "temperature_c": 25.3,
-    "humidity_rh": 61.2,
-    "eco2_ppm": 415,
-    "tvoc_ppb": 9
+    "temperature": 25.3,
+    "humidity": 61.2,
+    "pressure": 1008.4,
+    "altitude": 41.5,
+    "flicker_hazard_count": 3,
+    "sunlight_duration_minutes": 42
   },
   "time": "2026-05-30T15:30:00+08:00"
 }
@@ -57,12 +59,14 @@ PowerShell example:
 
 ```powershell
 $body = @{
-  device_id = "esp32-c3-001"
+  device_id = "esp32-s3-001"
   sensor_data = @{
-    temperature_c = 25.3
-    humidity_rh = 61.2
-    eco2_ppm = 415
-    tvoc_ppb = 9
+    temperature = 25.3
+    humidity = 61.2
+    pressure = 1008.4
+    altitude = 41.5
+    flicker_hazard_count = 3
+    sunlight_duration_minutes = 42
   }
   time = "2026-05-30T15:30:00+08:00"
 } | ConvertTo-Json -Depth 5 -Compress
@@ -90,7 +94,7 @@ Fields:
 | `sensor_data` | object | yes | Flat sensor map. Each key is stored as `sensor_name`; values must be scalar JSON values, not nested objects or arrays. |
 | `time` | string or number | yes | Device-side measurement time. Accepts ISO timestamp, Unix seconds, or Unix milliseconds. |
 
-`sensor_data` may contain at most 8 sensor fields per upload. The device firmware should aggregate high-frequency samples before upload, for example Avg for temperature/humidity/pressure/altitude, Max for sound peak, and Sum for light clear counts.
+The current device upload fields are `humidity`, `temperature`, `pressure`, `altitude`, `flicker_hazard_count`, and `sunlight_duration_minutes`.
 
 Response:
 

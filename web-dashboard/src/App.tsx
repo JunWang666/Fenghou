@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { AlertCircle, Droplets, Gauge, MapPinned, RefreshCw, Thermometer, Wind } from "lucide-react";
+import { AlertCircle, Clock, Droplets, Gauge, MapPinned, RefreshCw, Sun, Thermometer, Zap } from "lucide-react";
 import {
   CartesianGrid,
   Line,
@@ -28,7 +28,9 @@ const METRICS: MetricConfig[] = [
   { key: "temperature", label: "温度", unit: "°C", color: "#e11d48", icon: <Thermometer size={22} />, precision: 1 },
   { key: "humidity", label: "湿度", unit: "%", color: "#2563eb", icon: <Droplets size={22} />, precision: 1 },
   { key: "pressure", label: "气压", unit: "hPa", color: "#0f766e", icon: <Gauge size={22} />, precision: 1 },
-  { key: "altitude", label: "海拔", unit: "m", color: "#7c3aed", icon: <MapPinned size={22} />, precision: 1 }
+  { key: "altitude", label: "海拔", unit: "m", color: "#7c3aed", icon: <MapPinned size={22} />, precision: 1 },
+  { key: "flicker_hazard_count", label: "频闪危害次数", unit: "次", color: "#dc2626", icon: <Zap size={22} />, precision: 0 },
+  { key: "sunlight_duration_minutes", label: "日照时长", unit: "分钟", color: "#ca8a04", icon: <Sun size={22} />, precision: 0 }
 ];
 
 const TIME_WINDOWS: Array<{ key: TimeWindowKey; label: string; hours: number; limit: number }> = [
@@ -183,7 +185,7 @@ export function App() {
           <p className="eyebrow">{isView ? "实时查看" : "历史趋势"}</p>
           <h1>{route.deviceId}</h1>
           <p className="subtitle">
-            {isView ? `最近 ${VIEW_WINDOW_MINUTES} 分钟内的最新读数` : `最近 ${activeWindow.label}环境数据`}
+            {isView ? `最近 ${VIEW_WINDOW_MINUTES} 分钟内的最新读数` : `最近 ${activeWindow.label}环境与光照数据`}
           </p>
         </div>
         <div className="hero-actions">
@@ -239,7 +241,7 @@ export function App() {
 
       {isView ? (
         <section className="view-status">
-          <Wind size={20} />
+          <Clock size={20} />
           <span>{loadedAt ? `更新于 ${formatTime(loadedAt)}` : loading ? "正在读取最近数据" : "等待数据"}</span>
         </section>
       ) : null}
