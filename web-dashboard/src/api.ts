@@ -29,6 +29,7 @@ export function fetchSensors(deviceId: string): Promise<SensorsResponse> {
 export function fetchReadings(params: {
   deviceId: string;
   sensors: string[];
+  bucket?: "hour";
   from?: string;
   to?: string;
   limit?: number;
@@ -45,6 +46,10 @@ export function fetchReadings(params: {
 
   if (params.to) {
     query.set("to", params.to);
+  }
+
+  if (params.bucket) {
+    query.set("bucket", params.bucket);
   }
 
   if (params.limit) {

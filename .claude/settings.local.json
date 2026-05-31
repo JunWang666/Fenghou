@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__MiniMax__web_search",
+      "WebSearch",
+      "WebFetch(domain:developer.huawei.com)",
+      "WebFetch(domain:gitee.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:juejin.cn)",
+      "WebFetch(domain:docs.openharmony.cn)",
+      "WebFetch(domain:stackoverflow.com)",
+      "WebFetch(domain:raw.githubusercontent.com)"
+    ]
+  }
+}

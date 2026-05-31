@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { AlertCircle, Clock, Droplets, Gauge, MapPinned, RefreshCw, Sun, Thermometer, Zap } from "lucide-react";
+import { AlertCircle, Clock, Droplets, Gauge, MapPinned, RefreshCw, Sun, Thermometer, Volume2, Zap } from "lucide-react";
 import {
   CartesianGrid,
   Line,
@@ -22,6 +22,7 @@ interface MetricConfig {
   color: string;
   icon: React.ReactNode;
   precision: number;
+  aggregate?: "hourly-sum";
 }
 
 const METRICS: MetricConfig[] = [
@@ -29,8 +30,34 @@ const METRICS: MetricConfig[] = [
   { key: "humidity", label: "湿度", unit: "%", color: "#2563eb", icon: <Droplets size={22} />, precision: 1 },
   { key: "pressure", label: "气压", unit: "hPa", color: "#0f766e", icon: <Gauge size={22} />, precision: 1 },
   { key: "altitude", label: "海拔", unit: "m", color: "#7c3aed", icon: <MapPinned size={22} />, precision: 1 },
-  { key: "flicker_hazard_count", label: "频闪危害次数", unit: "次", color: "#dc2626", icon: <Zap size={22} />, precision: 0 },
-  { key: "sunlight_duration_minutes", label: "日照时长", unit: "分钟", color: "#ca8a04", icon: <Sun size={22} />, precision: 0 }
+  { key: "noise_max_db", label: "每分钟噪声最大值", unit: "dB", color: "#0891b2", icon: <Volume2 size={22} />, precision: 1 },
+  {
+    key: "high_volume_exposure_minutes",
+    label: "高音量暴露时长",
+    unit: "小时",
+    color: "#ea580c",
+    icon: <Clock size={22} />,
+    precision: 2,
+    aggregate: "hourly-sum"
+  },
+  {
+    key: "flicker_hazard_count",
+    label: "频闪危害次数",
+    unit: "次",
+    color: "#dc2626",
+    icon: <Zap size={22} />,
+    precision: 0,
+    aggregate: "hourly-sum"
+  },
+  {
+    key: "sunlight_duration_minutes",
+    label: "日照时长",
+    unit: "小时",
+    color: "#ca8a04",
+    icon: <Sun size={22} />,
+    precision: 2,
+    aggregate: "hourly-sum"
+  }
 ];
 
 const TIME_WINDOWS: Array<{ key: TimeWindowKey; label: string; hours: number; limit: number }> = [
@@ -77,6 +104,28 @@ function formatValue(value: number | null | undefined, metric: MetricConfig): st
   return `${value.toFixed(metric.precision)}${metric.unit}`;
 }
 
+function displayReading(metric: MetricConfig, readings: Reading[], series: Array<{ time: string; timestamp: number; value: number }>): Reading | undefined {
+  if (metric.aggregate !== "hourly-sum") {
+    return latestByMetric(readings).get(metric.key);
+  }
+
+  if (series.length === 0) {
+    return undefined;
+  }
+
+  const total = series.reduce((sum, point) => sum + point.value, 0);
+  const latestPoint = series[series.length - 1];
+  return {
+    data_id: `${metric.key}:aggregate`,
+    device_id: "",
+    sensor_name: metric.key,
+    data: JSON.stringify(total),
+    value_number: total,
+    time: latestPoint.time,
+    upload_time: latestPoint.time
+  };
+}
+
 function latestByMetric(readings: Reading[]): Map<string, Reading> {
   const latest = new Map<string, Reading>();
 
@@ -118,6 +167,7 @@ export function App() {
       const response = await fetchReadings({
         deviceId: route.deviceId,
         sensors: METRICS.map((metric) => metric.key),
+        bucket: "hour",
         from,
         limit: route.mode === "view" ? 80 : activeWindow.limit
       });
@@ -135,13 +185,12 @@ export function App() {
     void loadData();
   }, [timeWindow]);
 
-  const latest = useMemo(() => latestByMetric(readings), [readings]);
-
   const metricSeries = useMemo(() => {
+    const rawSeries = new Map<string, Array<{ time: string; timestamp: number; value: number }>>();
     const series = new Map<string, Array<{ time: string; timestamp: number; value: number }>>();
 
     for (const metric of METRICS) {
-      series.set(metric.key, []);
+      rawSeries.set(metric.key, []);
     }
 
     for (const reading of readings) {
@@ -149,15 +198,16 @@ export function App() {
         continue;
       }
 
-      series.get(reading.sensor_name)?.push({
+      rawSeries.get(reading.sensor_name)?.push({
         time: reading.time,
         timestamp: Date.parse(reading.time),
         value: reading.value_number
       });
     }
 
-    for (const values of series.values()) {
+    for (const [key, values] of rawSeries) {
       values.sort((left, right) => left.time.localeCompare(right.time));
+      series.set(key, values);
     }
 
     return series;
@@ -185,7 +235,7 @@ export function App() {
           <p className="eyebrow">{isView ? "实时查看" : "历史趋势"}</p>
           <h1>{route.deviceId}</h1>
           <p className="subtitle">
-            {isView ? `最近 ${VIEW_WINDOW_MINUTES} 分钟内的最新读数` : `最近 ${activeWindow.label}环境与光照数据`}
+            {isView ? `最近 ${VIEW_WINDOW_MINUTES} 分钟内的最新读数` : `最近 ${activeWindow.label}环境、噪声与光照数据`}
           </p>
         </div>
         <div className="hero-actions">
@@ -219,8 +269,8 @@ export function App() {
 
       <section className={isView ? "metric-grid view-grid" : "metric-grid dashboard-grid"}>
         {METRICS.map((metric) => {
-          const reading = latest.get(metric.key);
           const series = metricSeries.get(metric.key) ?? [];
+          const reading = displayReading(metric, readings, series);
           return (
             <article className={isView ? "metric-card" : "metric-card chart-card"} key={metric.key}>
               <div className="metric-card-head">

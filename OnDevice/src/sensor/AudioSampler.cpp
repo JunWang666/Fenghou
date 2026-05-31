@@ -65,19 +65,23 @@ void AudioSampler::run() {
 
     if (millis() - windowStart >= 1000) {
       float rms = count ? sqrtf(sumSq / count) : 0.0f;
-      uint8_t level = static_cast<uint8_t>(constrain(rms * 600.0f, 0.0f, 100.0f));
+      float db = rms >= AUDIO_MIN_RMS_FOR_DB ? 20.0f * log10f(rms) + AUDIO_DB_SPL_OFFSET : 0.0f;
+      db = constrain(db, 0.0f, 130.0f);
+      uint8_t level = static_cast<uint8_t>(roundf(db));
       SensorSample sample = {};
       sample.kind = KIND_SOUND;
       sample.ms = millis();
       sample.ok = ok == ESP_OK && count > 0;
       sample.soundRms = rms;
       sample.soundPeak = min(peak, 1.0f);
+      sample.soundDb = db;
       sample.soundLevel = level;
-      DEBUG_LOG("[sensor:audio] ok=%d sample_count=%lu rms=%.5f peak=%.5f level=%u\n",
+      DEBUG_LOG("[sensor:audio] ok=%d sample_count=%lu rms=%.5f peak=%.5f db=%.1f level=%u\n",
                 sample.ok ? 1 : 0,
                 static_cast<unsigned long>(count),
                 sample.soundRms,
                 sample.soundPeak,
+                sample.soundDb,
                 sample.soundLevel);
       xQueueSend(sampleQueue_, &sample, QUEUE_WAIT);
 

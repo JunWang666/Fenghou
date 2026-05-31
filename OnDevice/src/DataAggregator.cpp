@@ -103,8 +103,23 @@ void DataAggregator::applySample(const SensorSample &sample) {
     if (sample.ok) {
       latestData_->soundRms = sample.soundRms;
       latestData_->soundPeak = sample.soundPeak;
+      latestData_->soundDb = sample.soundDb;
       latestData_->soundLevel = sample.soundLevel;
       soundPeak_.add(sample.soundPeak);
+      if (noiseMinuteStartMs_ == 0 || sample.ms - noiseMinuteStartMs_ >= AUDIO_NOISE_WINDOW_MS) {
+        noiseMinuteStartMs_ = sample.ms;
+        noiseMinuteMaxDb_ = sample.soundDb;
+      } else if (!isfinite(noiseMinuteMaxDb_) || sample.soundDb > noiseMinuteMaxDb_) {
+        noiseMinuteMaxDb_ = sample.soundDb;
+      }
+      uint32_t elapsedMs = lastSoundSampleMs_ == 0 ? AUDIO_SAMPLE_INTERVAL_MS : sample.ms - lastSoundSampleMs_;
+      lastSoundSampleMs_ = sample.ms;
+      elapsedMs = min(elapsedMs, AUDIO_SAMPLE_INTERVAL_MS * 2);
+      if (sample.soundDb >= AUDIO_HIGH_VOLUME_DB) {
+        highVolumeExposureMs_ += elapsedMs;
+      }
+      latestData_->noiseMaxDb = noiseMinuteMaxDb_;
+      latestData_->highVolumeExposureMinutes = static_cast<float>(highVolumeExposureMs_ / 60000UL);
       windowSampleCount_++;
     }
     break;
@@ -129,6 +144,10 @@ void DataAggregator::buildUploadSnapshot(LatestData *snapshot) const {
   if (soundPeak_.hasValue()) {
     snapshot->soundPeakMax = soundPeak_.maxValue();
   }
+  if (isfinite(noiseMinuteMaxDb_)) {
+    snapshot->noiseMaxDb = noiseMinuteMaxDb_;
+  }
+  snapshot->highVolumeExposureMinutes = static_cast<float>(highVolumeExposureMs_ / 60000UL);
   snapshot->sunlightDurationMinutes = static_cast<float>(sunlightDurationMs_ / 60000UL);
   snapshot->flickerHazardCount = static_cast<float>(flickerHazardCount_);
   snapshot->aggregateSampleCount = windowSampleCount_;

@@ -47,6 +47,7 @@ struct SensorSample {
   uint8_t flickerStatus;
   float soundRms;
   float soundPeak;
+  float soundDb;
   uint8_t soundLevel;
 };
 
@@ -73,7 +74,10 @@ struct LatestData {
   float soundRms = 0.0f;
   float soundPeak = 0.0f;
   float soundPeakMax = NAN;
+  float soundDb = NAN;
   uint8_t soundLevel = 0;
+  float noiseMaxDb = NAN;
+  float highVolumeExposureMinutes = NAN;
   float flickerHazardCount = NAN;
   float sunlightDurationMinutes = NAN;
   uint32_t aggregateSampleCount = 0;

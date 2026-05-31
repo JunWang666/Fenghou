@@ -51,6 +51,11 @@ static constexpr uint32_t BMP_SAMPLE_INTERVAL_MS = 1000;
 static constexpr uint32_t SGP_SAMPLE_INTERVAL_MS = 1000;
 static constexpr uint32_t AS7341_SAMPLE_INTERVAL_MS = 2000;
 static constexpr uint32_t NFC_POLL_INTERVAL_MS = 5000;
+static constexpr uint32_t AUDIO_SAMPLE_INTERVAL_MS = 1000;
+static constexpr uint32_t AUDIO_NOISE_WINDOW_MS = 60000;
+static constexpr float AUDIO_DB_SPL_OFFSET = 120.0f;
+static constexpr float AUDIO_MIN_RMS_FOR_DB = 0.000001f;
+static constexpr float AUDIO_HIGH_VOLUME_DB = 85.0f;
 
 static constexpr uint32_t DEFAULT_UPLOAD_INTERVAL_MS = 30000;
 static constexpr uint32_t MIN_UPLOAD_INTERVAL_MS = 30000;

@@ -38,6 +38,10 @@ private:
   MetricAggregate pressure_;
   MetricAggregate altitude_;
   MetricAggregate soundPeak_;
+  uint32_t lastSoundSampleMs_ = 0;
+  uint32_t noiseMinuteStartMs_ = 0;
+  float noiseMinuteMaxDb_ = NAN;
+  uint32_t highVolumeExposureMs_ = 0;
   uint32_t lastLightSampleMs_ = 0;
   uint32_t sunlightDurationMs_ = 0;
   uint32_t flickerHazardCount_ = 0;

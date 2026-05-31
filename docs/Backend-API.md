@@ -48,6 +48,8 @@ Request body:
     "humidity": 61.2,
     "pressure": 1008.4,
     "altitude": 41.5,
+    "noise_max_db": 76.4,
+    "high_volume_exposure_minutes": 2,
     "flicker_hazard_count": 3,
     "sunlight_duration_minutes": 42
   },
@@ -65,6 +67,8 @@ $body = @{
     humidity = 61.2
     pressure = 1008.4
     altitude = 41.5
+    noise_max_db = 76.4
+    high_volume_exposure_minutes = 2
     flicker_hazard_count = 3
     sunlight_duration_minutes = 42
   }
@@ -94,7 +98,7 @@ Fields:
 | `sensor_data` | object | yes | Flat sensor map. Each key is stored as `sensor_name`; values must be scalar JSON values, not nested objects or arrays. |
 | `time` | string or number | yes | Device-side measurement time. Accepts ISO timestamp, Unix seconds, or Unix milliseconds. |
 
-The current device upload fields are `humidity`, `temperature`, `pressure`, `altitude`, `flicker_hazard_count`, and `sunlight_duration_minutes`.
+The current device upload fields are `humidity`, `temperature`, `pressure`, `altitude`, `noise_max_db`, `high_volume_exposure_minutes`, `flicker_hazard_count`, and `sunlight_duration_minutes`.
 
 Response:
 
@@ -104,12 +108,16 @@ Response:
   "device_id": "esp32-c3-001",
   "time": "2026-05-30T07:30:00.000Z",
   "upload_time": "2026-05-30T07:30:01.000Z",
-  "sensor_count": 4,
+  "sensor_count": 8,
   "data_ids": [
     "uuid-1",
     "uuid-2",
     "uuid-3",
-    "uuid-4"
+    "uuid-4",
+    "uuid-5",
+    "uuid-6",
+    "uuid-7",
+    "uuid-8"
   ]
 }
 ```
