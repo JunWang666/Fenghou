@@ -154,6 +154,7 @@ async function hourlyAggregateReadings(
        SELECT
          sensor_name,
          strftime('%Y-%m-%dT%H:00:00.000Z', time) AS hour_time,
+         value,
          CASE
            WHEN previous_value IS NULL THEN 0
            WHEN value >= previous_value THEN value - previous_value
@@ -166,7 +167,8 @@ async function hourlyAggregateReadings(
        hour_time,
        SUM(
          CASE
-           WHEN sensor_name IN ('high_volume_exposure_minutes', 'sunlight_duration_minutes') THEN delta_value / 60.0
+           WHEN sensor_name = 'sunlight_duration_minutes' THEN value / 60.0
+           WHEN sensor_name = 'high_volume_exposure_minutes' THEN delta_value / 60.0
            ELSE delta_value
          END
        ) AS value

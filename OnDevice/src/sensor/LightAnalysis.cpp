@@ -2,8 +2,17 @@
 
 namespace {
 
-uint32_t lastCheckTime = 0;
-uint32_t sunlightExposureMs = 0;
+static constexpr uint32_t SUNLIGHT_RESULT_WINDOW_MS = 60000;
+static constexpr uint8_t SUNLIGHT_SAMPLE_HISTORY_SIZE = 32;
+
+struct SunlightSample {
+  uint32_t time = 0;
+  bool strictSunlight = false;
+};
+
+SunlightSample sunlightSamples[SUNLIGHT_SAMPLE_HISTORY_SIZE];
+uint8_t nextSunlightSample = 0;
+uint8_t sunlightSampleCount = 0;
 
 } // namespace
 
@@ -37,26 +46,30 @@ bool isStrictSunlight(const uint16_t f[8], uint16_t clear, uint16_t nir) {
          spread <= 10.0f;
 }
 
-bool updateExposureTracking(const uint16_t f[8], uint16_t clear, uint16_t nir, uint32_t currentTime) {
+uint8_t updateRecentMinuteResult(const uint16_t f[8], uint16_t clear, uint16_t nir, uint32_t currentTime) {
   bool strictSunlight = isStrictSunlight(f, clear, nir);
 
-  if (lastCheckTime == 0 || currentTime < lastCheckTime) {
-    lastCheckTime = currentTime;
-    return strictSunlight;
+  sunlightSamples[nextSunlightSample].time = currentTime;
+  sunlightSamples[nextSunlightSample].strictSunlight = strictSunlight;
+  nextSunlightSample = (nextSunlightSample + 1) % SUNLIGHT_SAMPLE_HISTORY_SIZE;
+  if (sunlightSampleCount < SUNLIGHT_SAMPLE_HISTORY_SIZE) {
+    sunlightSampleCount++;
   }
 
-  uint32_t deltaTime = currentTime - lastCheckTime;
-  lastCheckTime = currentTime;
-
-  if (strictSunlight) {
-    sunlightExposureMs += deltaTime;
+  uint8_t recentSamples = 0;
+  uint8_t recentStrictSamples = 0;
+  for (uint8_t i = 0; i < sunlightSampleCount; i++) {
+    const SunlightSample &sample = sunlightSamples[i];
+    if (currentTime < sample.time || currentTime - sample.time > SUNLIGHT_RESULT_WINDOW_MS) {
+      continue;
+    }
+    recentSamples++;
+    if (sample.strictSunlight) {
+      recentStrictSamples++;
+    }
   }
 
-  return strictSunlight;
-}
-
-uint32_t getSunlightExposureMinutes() {
-  return sunlightExposureMs / 60000UL;
+  return recentSamples > 0 && recentStrictSamples * 2 >= recentSamples ? 1 : 0;
 }
 
 } // namespace LightAnalysis

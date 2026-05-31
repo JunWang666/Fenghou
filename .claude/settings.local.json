@@ -12,7 +12,10 @@
       "WebFetch(domain:stackoverflow.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:www.cnblogs.com)",
-      "WebFetch(domain:www.huawei.com)"
+      "WebFetch(domain:www.huawei.com)",
+      "Read(//c/Users/gouzuang/AppData/Local/Huawei/**)",
+      "Read(//c/Program Files/Huawei/**)",
+      "Read(//c//**)"
     ]
   }
 }

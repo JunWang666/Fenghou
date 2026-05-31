@@ -1,22 +1,17 @@
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { fetchReadings } from '../api';
-import type { Reading, MetricConfig, TimeWindow } from '../models';
-import { ALL_METRICS, TIME_WINDOWS, formatMetricTime, formatShortTime, formatValue } from '../models';
+import type { Reading, MetricConfig, TimeWindow, ChartPoint } from '../models';
+import {
+  ALL_METRICS, TIME_WINDOWS, formatMetricTime, formatShortTime, formatValue,
+  buildSeries, getDisplayValue, getDisplayTime
+} from '../models';
 
 const DOMAIN = 0x0000;
 const TAG = 'DeviceTrendPage';
 
-interface ChartPoint {
-  time: string;
-  timestamp: number;
-  value: number;
-}
-
 @Component
 struct TrendChart {
   @Prop color: string = '#2563eb';
-  @Prop label: string = '';
-  @Prop unit: string = '';
   @Prop precision: number = 0;
   points: ChartPoint[] = [];
   private context: CanvasRenderingContext2D = new CanvasRenderingContext2D(new RenderingContextSettings(true));
@@ -29,17 +24,17 @@ struct TrendChart {
     ctx.clearRect(0, 0, width, height);
 
     if (this.points.length === 0) {
-      ctx.font = '12px sans-serif';
+      ctx.font = '16px sans-serif';
       ctx.fillStyle = '#9ca3af';
       ctx.textAlign = 'center';
       ctx.fillText('暂无数据', width / 2, height / 2);
       return;
     }
 
-    const paddingLeft: number = 45;
-    const paddingRight: number = 12;
-    const paddingTop: number = 12;
-    const paddingBottom: number = 28;
+    const paddingLeft: number = 50;
+    const paddingRight: number = 16;
+    const paddingTop: number = 16;
+    const paddingBottom: number = 32;
     const chartWidth: number = width - paddingLeft - paddingRight;
     const chartHeight: number = height - paddingTop - paddingBottom;
 
@@ -73,27 +68,28 @@ struct TrendChart {
     }
 
     // Y axis labels
-    ctx.font = '10px sans-serif';
+    ctx.font = '14px sans-serif';
     ctx.fillStyle = '#6b7280';
     ctx.textAlign = 'right';
     for (let i = 0; i <= 4; i++) {
       const y: number = paddingTop + (chartHeight * i) / 4;
       const val: number = maxVal - (valRange * i) / 4;
-      ctx.fillText(val.toFixed(this.precision), paddingLeft - 4, y + 4);
+      ctx.fillText(val.toFixed(this.precision), paddingLeft - 6, y + 5);
     }
 
     // X axis labels
+    ctx.font = '13px sans-serif';
     ctx.textAlign = 'center';
     const labelCount: number = Math.min(this.points.length, 5);
     const step: number = Math.max(1, Math.floor(this.points.length / labelCount));
     for (let i = 0; i < this.points.length; i += step) {
       const x: number = paddingLeft + ((this.points[i].timestamp - minTime) / timeRange) * chartWidth;
-      ctx.fillText(formatShortTime(this.points[i].time), x, height - 6);
+      ctx.fillText(formatShortTime(this.points[i].time), x, height - 8);
     }
 
     // Line
     ctx.strokeStyle = this.color;
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 2.5;
     ctx.beginPath();
     for (let i = 0; i < this.points.length; i++) {
       const x: number = paddingLeft + ((this.points[i].timestamp - minTime) / timeRange) * chartWidth;
@@ -112,7 +108,7 @@ struct TrendChart {
       const x: number = paddingLeft + ((p.timestamp - minTime) / timeRange) * chartWidth;
       const y: number = paddingTop + ((maxVal - p.value) / valRange) * chartHeight;
       ctx.beginPath();
-      ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+      ctx.arc(x, y, 3.5, 0, Math.PI * 2);
       ctx.fill();
     }
   }
@@ -120,7 +116,8 @@ struct TrendChart {
   build() {
     Canvas(this.context)
       .width('100%')
-      .height(160)
+      .height(200)
+      .clip(true)
       .onReady(() => {
         this.drawChart();
       })
@@ -162,50 +159,6 @@ export struct DeviceTrendPage {
     }
   }
 
-  private getLatestValue(metricKey: string): number | null {
-    let latest: Reading | null = null;
-    for (const r of this.readings) {
-      if (r.sensor_name === metricKey) {
-        if (!latest || r.time > latest.time) {
-          latest = r;
-        }
-      }
-    }
-    return latest ? latest.value_number : null;
-  }
-
-  private getLatestTime(metricKey: string): string {
-    let latest: Reading | null = null;
-    for (const r of this.readings) {
-      if (r.sensor_name === metricKey) {
-        if (!latest || r.time > latest.time) {
-          latest = r;
-        }
-      }
-    }
-    return latest ? latest.time : '';
-  }
-
-  private getMetricSeries(metricKey: string): ChartPoint[] {
-    const points: ChartPoint[] = [];
-    for (const r of this.readings) {
-      if (r.sensor_name === metricKey && r.value_number !== null) {
-        points.push({
-          time: r.time,
-          timestamp: new Date(r.time).getTime(),
-          value: r.value_number
-        });
-      }
-    }
-    points.sort((a: ChartPoint, b: ChartPoint) => a.timestamp - b.timestamp);
-    return points;
-  }
-
-  private formatCardTime(isoTime: string): string {
-    if (isoTime.length === 0) return '暂无数据';
-    return formatMetricTime(isoTime);
-  }
-
   private getActiveWindowLabel(): string {
     const tw: TimeWindow | undefined = TIME_WINDOWS.find((tw: TimeWindow) => tw.key === this.selectedWindow);
     return tw ? tw.label : '24小时';
@@ -223,7 +176,7 @@ export struct DeviceTrendPage {
           .fontSize(14)
           .fontColor('#374151')
         Blank()
-        Text(this.formatCardTime(this.getLatestTime(metric.key)))
+        Text(this.formatCardTime(this.getCardTime(metric)))
           .fontSize(11)
           .fontColor('#9ca3af')
       }
@@ -231,7 +184,7 @@ export struct DeviceTrendPage {
       .margin({ bottom: 6 })
 
       // Value
-      Text(formatValue(this.getLatestValue(metric.key), metric.precision, metric.unit))
+      Text(this.getCardValue(metric))
         .fontSize(24)
         .fontWeight(FontWeight.Bold)
         .fontColor(metric.color)
@@ -241,10 +194,8 @@ export struct DeviceTrendPage {
       // Chart
       TrendChart({
         color: metric.color,
-        label: metric.label,
-        unit: metric.unit,
         precision: metric.precision,
-        points: this.getMetricSeries(metric.key)
+        points: this.getCardSeries(metric)
       })
     }
     .padding(16)
@@ -252,6 +203,27 @@ export struct DeviceTrendPage {
     .backgroundColor('#ffffff')
     .borderRadius(12)
     .shadow({ radius: 4, color: '#1A000000', offsetX: 0, offsetY: 2 })
+    .margin({ bottom: 12 })
+  }
+
+  private getCardSeries(metric: MetricConfig): ChartPoint[] {
+    return buildSeries(this.readings, metric.key);
+  }
+
+  private getCardValue(metric: MetricConfig): string {
+    const series: ChartPoint[] = this.getCardSeries(metric);
+    const val: number | null = getDisplayValue(metric, this.readings, series);
+    return formatValue(val, metric.precision, metric.unit);
+  }
+
+  private getCardTime(metric: MetricConfig): string {
+    const series: ChartPoint[] = this.getCardSeries(metric);
+    return getDisplayTime(metric, this.readings, series);
+  }
+
+  private formatCardTime(isoTime: string): string {
+    if (isoTime.length === 0) return '暂无数据';
+    return formatMetricTime(isoTime);
   }
 
   build() {
@@ -313,26 +285,30 @@ export struct DeviceTrendPage {
             .width('100%')
             .padding({ left: 16, right: 16, top: 16, bottom: 8 })
 
-            // Time window selector + refresh
+            // Time window selector
+            Flex({ wrap: FlexWrap.Wrap }) {
+              ForEach(TIME_WINDOWS, (tw: TimeWindow) => {
+                Button(tw.label)
+                  .type(ButtonType.Capsule)
+                  .fontSize(12)
+                  .height(32)
+                  .padding({ left: 12, right: 12 })
+                  .margin({ right: 8, bottom: 8 })
+                  .backgroundColor(this.selectedWindow === tw.key ? '#2563eb' : '#e5e7eb')
+                  .fontColor(this.selectedWindow === tw.key ? '#ffffff' : '#374151')
+                  .onClick(() => {
+                    if (this.selectedWindow !== tw.key) {
+                      this.selectedWindow = tw.key;
+                      this.loadData();
+                    }
+                  })
+              }, (tw: TimeWindow) => tw.key)
+            }
+            .width('100%')
+            .padding({ left: 16, right: 16 })
+
+            // Refresh button
             Row() {
-              Flex({ wrap: FlexWrap.Wrap }) {
-                ForEach(TIME_WINDOWS, (tw: TimeWindow) => {
-                  Button(tw.label)
-                    .type(ButtonType.Capsule)
-                    .fontSize(12)
-                    .height(32)
-                    .padding({ left: 12, right: 12 })
-                    .margin({ right: 8, bottom: 4 })
-                    .backgroundColor(this.selectedWindow === tw.key ? '#2563eb' : '#e5e7eb')
-                    .fontColor(this.selectedWindow === tw.key ? '#ffffff' : '#374151')
-                    .onClick(() => {
-                      if (this.selectedWindow !== tw.key) {
-                        this.selectedWindow = tw.key;
-                        this.loadData();
-                      }
-                    })
-                }, (tw: TimeWindow) => tw.key)
-              }
               Blank()
               Button(this.loading ? '...' : '刷新')
                 .type(ButtonType.Capsule)
@@ -347,7 +323,6 @@ export struct DeviceTrendPage {
             }
             .width('100%')
             .padding({ left: 16, right: 16, bottom: 8 })
-            .alignItems(VerticalAlign.Center)
 
             // Error banner
             if (this.error.length > 0) {

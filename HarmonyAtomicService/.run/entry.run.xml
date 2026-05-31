@@ -7,11 +7,9 @@
     <AUTO_DEPENDENCIES_DATA>true</AUTO_DEPENDENCIES_DATA>
     <WEB_VIEW_DEBUG>false</WEB_VIEW_DEBUG>
     <INSTALL_FLAGS_CONFIG_KEY />
-    <LAUNCH_FLAGS_CONFIG_KEY />
+    <LAUNCH_FLAGS_CONFIG_KEY>-a ohos.want.action.viewData -u https://fenghou.goudaijun.top/view/test_2</LAUNCH_FLAGS_CONFIG_KEY>
     <LAUNCH_ABILITY_CONFIG_TYPE>Default Ability</LAUNCH_ABILITY_CONFIG_TYPE>
     <LAUNCH_ABILITY_CONFIG_VALUE />
-    <WANT_ACTION>ohos.want.action.viewData</WANT_ACTION>
-    <WANT_URI>https://fenghou.goudaijun.top/view/test_2</WANT_URI>
     <SYMBOL_DIRS>[]</SYMBOL_DIRS>
     <DEBUGGER_TYPE>Detect Automatically</DEBUGGER_TYPE>
     <MULTI_HAP_MODULE_DATA>[]</MULTI_HAP_MODULE_DATA>

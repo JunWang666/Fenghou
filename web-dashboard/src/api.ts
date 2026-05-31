@@ -23,7 +23,7 @@ export function fetchDevices(): Promise<DevicesResponse> {
 }
 
 export function fetchSensors(deviceId: string): Promise<SensorsResponse> {
-  return getJson<SensorsResponse>(`${API_BASE}/devices/${encodeURIComponent(deviceId)}/sensors`);
+  return getJson<SensorsResponse>(`${API_BASE}/devices/${deviceId}/sensors`);
 }
 
 export function fetchReadings(params: {
@@ -57,6 +57,6 @@ export function fetchReadings(params: {
   }
 
   return getJson<ReadingsResponse>(
-    `${API_BASE}/devices/${encodeURIComponent(params.deviceId)}/readings?${query.toString()}`
+    `${API_BASE}/devices/${params.deviceId}/readings?${query.toString()}`
   );
 }

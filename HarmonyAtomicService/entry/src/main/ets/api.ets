@@ -45,6 +45,6 @@ export function fetchReadings(deviceId: string, sensors: string[], from: string,
   queryParts.push(`from=${encodeURIComponent(from)}`);
   queryParts.push(`limit=${limit.toString()}`);
 
-  const url: string = `${API_BASE}/devices/${encodeURIComponent(deviceId)}/readings?${queryParts.join('&')}`;
+  const url: string = `${API_BASE}/devices/${deviceId}/readings?${queryParts.join('&')}`;
   return getReadingsJson(url);
 }

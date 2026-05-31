@@ -9,20 +9,17 @@ const TAG = 'Index';
 @Entry
 @Component
 struct Index {
-  @StorageLink('launchUri') launchUri: string = '';
-  pathStack: NavPathStack = new NavPathStack();
+  @Provide('pathStack') pathStack: NavPathStack = new NavPathStack();
   @State deviceId: string = '';
   @State errorMessage: string = '';
   @State resolved: boolean = false;
 
   aboutToAppear(): void {
     AppStorage.setOrCreate<string>('deviceId', '');
-    this.parseLaunchUri();
-  }
-
-  private parseLaunchUri(): void {
-    if (this.launchUri.length > 0) {
-      this.extractDeviceId(this.launchUri);
+    const launchUri: string = AppStorage.get<string>('launchUri') ?? '';
+    hilog.info(DOMAIN, TAG, `launchUri from AppStorage: ${launchUri}`);
+    if (launchUri.length > 0) {
+      this.extractDeviceId(launchUri);
     }
   }
 
@@ -85,14 +82,18 @@ struct Index {
           .justifyContent(FlexAlign.Center)
         } else if (!this.resolved) {
           Column() {
-            LoadingProgress()
-              .width(48)
-              .height(48)
-              .color('#2563eb')
-            Text('正在加载...')
-              .fontSize(14)
+            Text('📱')
+              .fontSize(48)
+              .margin({ bottom: 16 })
+            Text('等待启动')
+              .fontSize(16)
               .fontColor('#666666')
-              .margin({ top: 16 })
+              .textAlign(TextAlign.Center)
+            Text('请通过NFC标签或分享链接打开')
+              .fontSize(14)
+              .fontColor('#999999')
+              .margin({ top: 8 })
+              .textAlign(TextAlign.Center)
           }
           .width('100%')
           .height('100%')
@@ -107,7 +108,7 @@ struct Index {
       .height('100%')
       .backgroundColor('#f3f4f6')
     }
-    .title('凤候')
+    .title(this.resolved ? `凤候-${this.deviceId}` : '凤候')
     .navDestination(this.pageMap)
   }
 

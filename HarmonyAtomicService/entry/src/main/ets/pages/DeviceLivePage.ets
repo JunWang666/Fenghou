@@ -1,24 +1,19 @@
 import { hilog } from '@kit.PerformanceAnalysisKit';
 import { fetchReadings } from '../api';
 import type { Reading, MetricConfig } from '../models';
-import { ALL_METRICS, VIEW_WINDOW_MINUTES, formatMetricTime, formatValue } from '../models';
+import { ALL_METRICS, VIEW_WINDOW_MINUTES, formatMetricTime, formatValue, getLatestReading } from '../models';
 
 const DOMAIN = 0x0000;
 const TAG = 'DeviceLivePage';
-
-interface LatestReading {
-  value: number | null;
-  time: string;
-}
 
 @Component
 export struct DeviceLivePage {
   @Prop deviceId: string = '';
   @State loading: boolean = true;
   @State error: string = '';
-  @State latestMap: Map<string, LatestReading> = new Map();
+  @State readings: Reading[] = [];
   @State loadedAt: string = '';
-  pathStack: NavPathStack = new NavPathStack();
+  @Consume('pathStack') pathStack: NavPathStack;
 
   aboutToAppear(): void {
     this.loadData();
@@ -34,23 +29,7 @@ export struct DeviceLivePage {
 
     try {
       const response = await fetchReadings(this.deviceId, sensorKeys, from, 80);
-      const newMap = new Map<string, LatestReading>();
-
-      for (const metric of ALL_METRICS) {
-        newMap.set(metric.key, { value: null, time: '' });
-      }
-
-      for (const reading of response.readings) {
-        const existing = newMap.get(reading.sensor_name);
-        if (!existing || existing.time.length === 0 || reading.time > existing.time) {
-          newMap.set(reading.sensor_name, {
-            value: reading.value_number,
-            time: reading.time
-          });
-        }
-      }
-
-      this.latestMap = newMap;
+      this.readings = response.readings;
       this.loadedAt = new Date().toISOString();
       hilog.info(DOMAIN, TAG, `Loaded ${response.readings.length} readings`);
     } catch (err) {
@@ -68,17 +47,17 @@ export struct DeviceLivePage {
     return formatMetricTime(isoTime);
   }
 
-  private getLatestTime(key: string): string {
-    const reading = this.latestMap.get(key);
-    return reading ? reading.time : '';
-  }
-
-  private formatCardValue(metric: MetricConfig): string {
-    const reading = this.latestMap.get(metric.key);
-    if (!reading) {
+  private getCardValue(metric: MetricConfig): string {
+    const latest: Reading | null = getLatestReading(this.readings, metric.key);
+    if (!latest) {
       return '--';
     }
-    return formatValue(reading.value, metric.precision, metric.unit);
+    return formatValue(latest.value_number, metric.precision, metric.unit);
+  }
+
+  private getCardTime(metric: MetricConfig): string {
+    const latest: Reading | null = getLatestReading(this.readings, metric.key);
+    return latest ? latest.time : '';
   }
 
   @Builder
@@ -95,14 +74,14 @@ export struct DeviceLivePage {
       .width('100%')
       .margin({ bottom: 8 })
 
-      Text(this.formatCardValue(metric))
+      Text(this.getCardValue(metric))
         .fontSize(28)
         .fontWeight(FontWeight.Bold)
         .fontColor(metric.color)
         .width('100%')
         .margin({ bottom: 6 })
 
-      Text(this.formatCardTime(this.getLatestTime(metric.key)))
+      Text(this.formatCardTime(this.getCardTime(metric)))
         .fontSize(12)
         .fontColor('#9ca3af')
         .width('100%')
@@ -117,7 +96,7 @@ export struct DeviceLivePage {
   build() {
     NavDestination() {
       Column() {
-        if (this.loading && this.latestMap.size === 0) {
+        if (this.loading && this.readings.length === 0) {
           Column() {
             LoadingProgress()
               .width(48)
@@ -131,7 +110,7 @@ export struct DeviceLivePage {
           .width('100%')
           .height('100%')
           .justifyContent(FlexAlign.Center)
-        } else if (this.error.length > 0 && this.latestMap.size === 0) {
+        } else if (this.error.length > 0 && this.readings.length === 0) {
           Column() {
             Text('⚠')
               .fontSize(48)
