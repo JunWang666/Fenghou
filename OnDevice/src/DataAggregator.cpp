@@ -82,18 +82,12 @@ void DataAggregator::applySample(const SensorSample &sample) {
       latestData_->clear = sample.clear;
       latestData_->nir = sample.nir;
       latestData_->sunlightPresent = sample.sunlightPresent;
+      latestData_->sunlightDurationMinutes = sample.sunlightDurationMinutes;
       latestData_->flickerHazard = sample.flickerHazard;
       latestData_->flickerStatus = sample.flickerStatus;
-      uint32_t elapsedMs = lastLightSampleMs_ == 0 ? AS7341_SAMPLE_INTERVAL_MS : sample.ms - lastLightSampleMs_;
-      lastLightSampleMs_ = sample.ms;
-      elapsedMs = min(elapsedMs, AS7341_SAMPLE_INTERVAL_MS * 2);
-      if (sample.sunlightPresent) {
-        sunlightDurationMs_ += elapsedMs;
-      }
       if (sample.flickerHazard) {
         flickerHazardCount_++;
       }
-      latestData_->sunlightDurationMinutes = static_cast<float>(sunlightDurationMs_ / 60000UL);
       latestData_->flickerHazardCount = static_cast<float>(flickerHazardCount_);
       windowSampleCount_++;
     }
@@ -148,7 +142,7 @@ void DataAggregator::buildUploadSnapshot(LatestData *snapshot) const {
     snapshot->noiseMaxDb = noiseMinuteMaxDb_;
   }
   snapshot->highVolumeExposureMinutes = static_cast<float>(highVolumeExposureMs_ / 60000UL);
-  snapshot->sunlightDurationMinutes = static_cast<float>(sunlightDurationMs_ / 60000UL);
+  snapshot->sunlightDurationMinutes = latestData_->sunlightDurationMinutes;
   snapshot->flickerHazardCount = static_cast<float>(flickerHazardCount_);
   snapshot->aggregateSampleCount = windowSampleCount_;
 }

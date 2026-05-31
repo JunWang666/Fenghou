@@ -4,6 +4,7 @@
 #include <math.h>
 
 #include "Constants.h"
+#include "DeviceIdentity.h"
 
 enum SensorKind : uint8_t {
   KIND_AHT,
@@ -16,7 +17,7 @@ enum SensorKind : uint8_t {
 
 struct DeviceConfig {
   DeviceConfig() {
-    strlcpy(deviceId, DEFAULT_DEVICE_ID, sizeof(deviceId));
+    setChipDeviceId(deviceId, sizeof(deviceId));
   }
 
   char ssid[33] = "";

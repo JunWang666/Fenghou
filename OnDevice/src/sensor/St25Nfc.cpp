@@ -3,13 +3,18 @@
 #include <Wire.h>
 
 #include "../DebugLog.h"
+#include "DeviceIdentity.h"
 
 void I2cSensorManager::initializeNfcViewLink() {
   DeviceConfig cfg = {};
   if (configStore_) {
     configStore_->getCopy(&cfg);
   }
-  const char *deviceId = cfg.deviceId[0] ? cfg.deviceId : DEFAULT_DEVICE_ID;
+  char fallbackDeviceId[18] = "";
+  if (!cfg.deviceId[0]) {
+    setChipDeviceId(fallbackDeviceId, sizeof(fallbackDeviceId));
+  }
+  const char *deviceId = cfg.deviceId[0] ? cfg.deviceId : fallbackDeviceId;
 
   char url[96];
   snprintf(url, sizeof(url), "%s%s", DEFAULT_VIEW_URL_PREFIX, deviceId);

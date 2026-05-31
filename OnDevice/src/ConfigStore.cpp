@@ -9,7 +9,7 @@ void ConfigStore::load() {
   String ssid = prefs_.isKey("ssid") ? prefs_.getString("ssid") : WIFI_SSID;
   String pass = prefs_.isKey("pass") ? prefs_.getString("pass") : WIFI_PASSWORD;
   String server = prefs_.isKey("server") ? prefs_.getString("server") : DEFAULT_SERVER;
-  String dev = prefs_.isKey("dev") ? prefs_.getString("dev") : DEFAULT_DEVICE_ID;
+  String dev = chipDeviceIdString();
   String token = prefs_.isKey("token") ? prefs_.getString("token") : "";
   uint32_t interval = prefs_.isKey("interval") ? prefs_.getUInt("interval") : DEFAULT_UPLOAD_INTERVAL_MS;
 
@@ -28,7 +28,6 @@ void ConfigStore::save(const DeviceConfig &cfg) {
   prefs_.putString("ssid", cfg.ssid);
   prefs_.putString("pass", cfg.password);
   prefs_.putString("server", cfg.server);
-  prefs_.putString("dev", cfg.deviceId);
   prefs_.putString("token", cfg.token);
   prefs_.putUInt("interval", cfg.uploadIntervalMs);
 }
@@ -133,7 +132,6 @@ bool ConfigStore::parseConfigPayload(const char *raw, DeviceConfig *cfg) {
   char ssid[sizeof(cfg->ssid)];
   char password[sizeof(cfg->password)];
   char server[sizeof(cfg->server)];
-  char deviceId[sizeof(cfg->deviceId)];
   char token[sizeof(cfg->token)];
   if (!extractValue(json, "ssid", ssid, sizeof(ssid))) {
     return false;
@@ -144,9 +142,6 @@ bool ConfigStore::parseConfigPayload(const char *raw, DeviceConfig *cfg) {
   if (!extractValue(json, "server", server, sizeof(server))) {
     return false;
   }
-  if (!extractValue(json, "device_id", deviceId, sizeof(deviceId))) {
-    strlcpy(deviceId, DEFAULT_DEVICE_ID, sizeof(deviceId));
-  }
   if (!extractValue(json, "token", token, sizeof(token))) {
     token[0] = 0;
   }
@@ -156,7 +151,7 @@ bool ConfigStore::parseConfigPayload(const char *raw, DeviceConfig *cfg) {
   strlcpy(cfg->ssid, ssid, sizeof(cfg->ssid));
   strlcpy(cfg->password, password, sizeof(cfg->password));
   strlcpy(cfg->server, server, sizeof(cfg->server));
-  strlcpy(cfg->deviceId, deviceId, sizeof(cfg->deviceId));
+  setChipDeviceId(cfg->deviceId, sizeof(cfg->deviceId));
   strlcpy(cfg->token, token, sizeof(cfg->token));
   cfg->uploadIntervalMs = constrain(interval, MIN_UPLOAD_INTERVAL_MS, MAX_UPLOAD_INTERVAL_MS);
   cfg->valid = true;

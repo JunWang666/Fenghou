@@ -10,7 +10,9 @@
       "WebFetch(domain:juejin.cn)",
       "WebFetch(domain:docs.openharmony.cn)",
       "WebFetch(domain:stackoverflow.com)",
-      "WebFetch(domain:raw.githubusercontent.com)"
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:www.cnblogs.com)",
+      "WebFetch(domain:www.huawei.com)"
     ]
   }
 }

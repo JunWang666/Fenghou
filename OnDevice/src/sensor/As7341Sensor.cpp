@@ -135,32 +135,6 @@ bool I2cSensorManager::as7341ReadFlickerStatus(uint8_t *status) {
   return ok;
 }
 
-bool I2cSensorManager::as7341IsSunlightLike(const uint16_t f[8], uint16_t clear, uint16_t nir) {
-  uint32_t visible = 0;
-  for (uint8_t i = 0; i < 8; i++) {
-    visible += f[i];
-  }
-  if (clear < 50 || visible < 120) {
-    return false;
-  }
-
-  float blueRatio = static_cast<float>(f[0] + f[1] + f[2]) / static_cast<float>(visible);
-  float redRatio = static_cast<float>(f[6] + f[7]) / static_cast<float>(visible);
-  float nirRatio = static_cast<float>(nir) / static_cast<float>(visible);
-  uint16_t minVisible = f[0];
-  uint16_t maxVisible = f[0];
-  for (uint8_t i = 1; i < 8; i++) {
-    minVisible = min(minVisible, f[i]);
-    maxVisible = max(maxVisible, f[i]);
-  }
-  float spread = minVisible > 0 ? static_cast<float>(maxVisible) / static_cast<float>(minVisible) : 99.0f;
-
-  return nirRatio >= 0.015f &&
-         redRatio >= 0.18f &&
-         blueRatio >= 0.08f &&
-         spread <= 18.0f;
-}
-
 bool I2cSensorManager::as7341IsFlickerHazard(uint8_t status) {
   bool saturated = (status & 0x10) != 0;
   bool valid100Hz = (status & 0x04) != 0;

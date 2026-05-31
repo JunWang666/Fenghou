@@ -3,6 +3,7 @@
 #include <Wire.h>
 
 #include "../DebugLog.h"
+#include "LightAnalysis.h"
 
 void I2cSensorManager::begin(QueueHandle_t sampleQueue,
                              ConfigStore *configStore,
@@ -156,20 +157,22 @@ void I2cSensorManager::pollAs7341(uint32_t now) {
   sample.ms = now;
   sample.ok = as7341Present_ && as7341Read(sample.f, &sample.clear, &sample.nir);
   if (sample.ok) {
-    sample.sunlightPresent = as7341IsSunlightLike(sample.f, sample.clear, sample.nir);
+    sample.sunlightPresent = LightAnalysis::updateExposureTracking(sample.f, sample.clear, sample.nir, now);
+    sample.sunlightDurationMinutes = static_cast<float>(LightAnalysis::getSunlightExposureMinutes());
     sample.flickerHazard = as7341ReadFlickerStatus(&sample.flickerStatus) &&
                            as7341IsFlickerHazard(sample.flickerStatus);
   }
   if (!sample.ok && i2cDevicePresent(AS7341_ADDR)) {
     as7341Present_ = as7341Setup();
   }
-  DEBUG_LOG("[sensor:as7341] ok=%d f=[%u,%u,%u,%u,%u,%u,%u,%u] clear=%u nir=%u sunlight=%d flicker_status=0x%02X hazard=%d\n",
+  DEBUG_LOG("[sensor:as7341] ok=%d f=[%u,%u,%u,%u,%u,%u,%u,%u] clear=%u nir=%u sunlight=%d sunlight_min=%.0f flicker_status=0x%02X hazard=%d\n",
             sample.ok ? 1 : 0,
             sample.f[0], sample.f[1], sample.f[2], sample.f[3],
             sample.f[4], sample.f[5], sample.f[6], sample.f[7],
             sample.clear,
             sample.nir,
             sample.sunlightPresent ? 1 : 0,
+            sample.sunlightDurationMinutes,
             sample.flickerStatus,
             sample.flickerHazard ? 1 : 0);
   sendSample(sample);

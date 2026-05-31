@@ -81,7 +81,6 @@ private:
   bool as7341ReadSix(uint16_t *out);
   bool as7341Read(uint16_t f[8], uint16_t *clear, uint16_t *nir);
   bool as7341ReadFlickerStatus(uint8_t *status);
-  static bool as7341IsSunlightLike(const uint16_t f[8], uint16_t clear, uint16_t nir);
   static bool as7341IsFlickerHazard(uint8_t status);
 
   void initializeNfcViewLink();

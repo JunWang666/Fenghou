@@ -21,7 +21,6 @@ static constexpr uint8_t BMP280_ADDR_PRIMARY = 0x76;
 static constexpr uint8_t BMP280_ADDR_SECONDARY = 0x77;
 static constexpr uint8_t ST25_USER_ADDR = 0x53;
 
-static constexpr const char *DEFAULT_DEVICE_ID = "env-node-001";
 static constexpr const char *CONFIG_BEGIN = "CFG:";
 
 static constexpr uint32_t DEFAULT_UPLOAD_INTERVAL_MS = 10000;

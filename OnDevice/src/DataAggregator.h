@@ -42,8 +42,6 @@ private:
   uint32_t noiseMinuteStartMs_ = 0;
   float noiseMinuteMaxDb_ = NAN;
   uint32_t highVolumeExposureMs_ = 0;
-  uint32_t lastLightSampleMs_ = 0;
-  uint32_t sunlightDurationMs_ = 0;
   uint32_t flickerHazardCount_ = 0;
   uint32_t windowSampleCount_ = 0;
 

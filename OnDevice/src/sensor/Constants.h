@@ -41,7 +41,6 @@ static constexpr uint8_t BMP280_ADDR_SECONDARY = 0x77;
 static constexpr uint8_t ST25_USER_ADDR = 0x53;
 
 
-static constexpr const char *DEFAULT_DEVICE_ID = DEVICE_ID;
 static constexpr const char *DEFAULT_SERVER = DEFAULT_UPLOAD_URL;
 static constexpr const char *DEFAULT_VIEW_URL_PREFIX = "https://fenghou.goudaijun.top/view/";
 static constexpr const char *CONFIG_BEGIN = "CFG:";
@@ -53,7 +52,7 @@ static constexpr uint32_t AS7341_SAMPLE_INTERVAL_MS = 2000;
 static constexpr uint32_t NFC_POLL_INTERVAL_MS = 5000;
 static constexpr uint32_t AUDIO_SAMPLE_INTERVAL_MS = 1000;
 static constexpr uint32_t AUDIO_NOISE_WINDOW_MS = 60000;
-static constexpr float AUDIO_DB_SPL_OFFSET = 120.0f;
+static constexpr float AUDIO_DB_SPL_OFFSET = 60.0f;
 static constexpr float AUDIO_MIN_RMS_FOR_DB = 0.000001f;
 static constexpr float AUDIO_HIGH_VOLUME_DB = 85.0f;
 
